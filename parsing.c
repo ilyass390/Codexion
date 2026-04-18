@@ -72,7 +72,7 @@ int	ft_parse_scheduler(char *str)
 
 static int	ft_validate_ranges(t_args *args)
 {
-	if (args->number_of_coders < 1)
+	if (args->nb_coders < 1)
 		return (ft_print_error("number_of_coders must be >= 1"), -1);
 	return (0);
 }
@@ -96,8 +96,8 @@ static int	ft_validate_numbers(char **argv)
 
 static int	ft_fill_args(char **argv, t_args *args)
 {
-	args->number_of_coders = ft_atoi(argv[1]);
-	if (args->number_of_coders == -1)
+	args->nb_coders = ft_atoi(argv[1]);
+	if (args->nb_coders == -1)
 		return (-1);
 	args->time_to_burnout = ft_atoi(argv[2]);
 	if (args->time_to_burnout == -1)
@@ -123,7 +123,8 @@ static int	ft_fill_args(char **argv, t_args *args)
 int	parse_args(int argc, char **argv, t_args *args)
 {
 	if (argc != 9)
-		return (ft_print_error("usage: ./codexion number_of_coders time_to_burnout time_to_compile time_to_debug time_to_refactor number_of_compiles_required dongle_cooldown scheduler"), -1);
+		return (ft_print_error("usage: ./codexion number_of_coders time_to_burnout time_to_compile time_to_debug time_to_refactor number_of_compiles_required dongle_cooldown scheduler"),
+			-1);
 	if (ft_validate_numbers(argv) == -1)
 		return (-1);
 	if (ft_fill_args(argv, args) == -1)

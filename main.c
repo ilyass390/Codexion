@@ -1,22 +1,69 @@
 #include "codexion.h"
-#include <stdio.h>
-#include <stdlib.h>
 
+static int	start_threads(t_table *table, int *created)
+{
+	int	i;
+
+	if (pthread_create(&table->monitor, NULL, monitor_routine, table) != 0)
+	{
+		ft_print_error("monitor thread creation failed");
+		return (-1);
+	}
+	i = 0;
+	while (i < table->args.nb_coders)
+	{
+		if (pthread_create(&table->coders[i].thread, NULL,
+				coder_routine, &table->coders[i]) != 0)
+		{
+			ft_print_error("coder thread creation failed");
+			pthread_mutex_lock(&table->sched_lock);
+			table->stop = 1;
+			pthread_cond_broadcast(&table->sched_cond);
+			pthread_mutex_unlock(&table->sched_lock);
+			return (-1);
+		}
+		(*created)++;
+		i++;
+	}
+	return (0);
+}
+
+static void	join_threads(t_table *table, int created)
+{
+	int	i;
+
+	pthread_join(table->monitor, NULL);
+	i = 0;
+	while (i < created)
+	{
+		pthread_join(table->coders[i].thread, NULL);
+		i++;
+	}
+}
 
 int	main(int argc, char **argv)
 {
+	t_table	table;
 	t_args	args;
+	int		created;
 
 	if (parse_args(argc, argv, &args) == -1)
 		return (1);
-	printf("number_of_coders           : %d\n", args.number_of_coders);
-	printf("time_to_burnout            : %d\n", args.time_to_burnout);
-	printf("time_to_compile            : %d\n", args.time_to_compile);
-	printf("time_to_debug              : %d\n", args.time_to_debug);
-	printf("time_to_refactor           : %d\n", args.time_to_refactor);
-	printf("number_of_compiles_required: %d\n", args.number_of_compiles_required);
-	printf("dongle_cooldown            : %d\n", args.dongle_cooldown);
-	printf("scheduler                  : %s\n", args.scheduler == FIFO ? "fifo" : "edf");
+	table.args = args;
+	created = 0;
+	if (init_table(&table) == -1)
+	{
+		ft_print_error("init failed");
+		cleanup(&table);
+		return (1);
+	}
+	if (start_threads(&table, &created) == -1)
+	{
+		join_threads(&table, created);
+		cleanup(&table);
+		return (1);
+	}
+	join_threads(&table, created);
+	cleanup(&table);
 	return (0);
-
 }
