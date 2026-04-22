@@ -1,65 +1,16 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   parsing.c                                          :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: iamessag <iamessag@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/04/20 11:44:10 by iamessag          #+#    #+#             */
+/*   Updated: 2026/04/20 12:08:14 by iamessag         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "codexion.h"
-
-void	ft_print_error(char *msg)
-{
-	fprintf(stderr, "Error: %s\n", msg);
-}
-
-int	ft_is_digit(char c)
-{
-	return (c >= '0' && c <= '9');
-}
-
-int	ft_is_valid_number(char *str)
-{
-	int	i;
-
-	if (!str || !*str)
-		return (0);
-	i = 0;
-	while (str[i] == ' ' || (str[i] >= 9 && str[i] <= 13))
-		i++;
-	if (str[i] == '+')
-		i++;
-	if (!str[i])
-		return (0);
-	while (str[i])
-	{
-		if (!ft_is_digit(str[i]))
-			return (0);
-		i++;
-	}
-	return (1);
-}
-
-int	ft_atoi(char *str)
-{
-	long	result;
-	int		i;
-
-	i = 0;
-	while (str[i] == ' ' || (str[i] >= 9 && str[i] <= 13))
-		i++;
-	if (str[i] == '-')
-	{
-		ft_print_error("invalid input");
-		return (-1);
-	}
-	if (str[i] == '+')
-		i++;
-	result = 0;
-	while (str[i])
-	{
-		result = result * 10 + (str[i] - '0');
-		if (result > INT_MAX)
-		{
-			ft_print_error("invalid input");
-			return (-1);
-		}
-		i++;
-	}
-	return ((int)result);
-}
 
 int	ft_parse_scheduler(char *str)
 {
@@ -79,14 +30,16 @@ static int	ft_validate_ranges(t_args *args)
 
 static int	ft_validate_numbers(char **argv)
 {
-	int	i;
+	int		i;
+	char	*c;
 
+	c = "all arguments except scheduler must be valid positive integers";
 	i = 1;
 	while (i <= 7)
 	{
 		if (!ft_is_valid_number(argv[i]))
 		{
-			ft_print_error("all arguments except scheduler must be valid positive integers");
+			ft_print_error(c);
 			return (-1);
 		}
 		i++;
@@ -111,8 +64,8 @@ static int	ft_fill_args(char **argv, t_args *args)
 	args->time_to_refactor = ft_atoi(argv[5]);
 	if (args->time_to_refactor == -1)
 		return (-1);
-	args->number_of_compiles_required = ft_atoi(argv[6]);
-	if (args->number_of_compiles_required == -1)
+	args->nb_comp = ft_atoi(argv[6]);
+	if (args->nb_comp == -1)
 		return (-1);
 	args->dongle_cooldown = ft_atoi(argv[7]);
 	if (args->dongle_cooldown == -1)
@@ -123,8 +76,7 @@ static int	ft_fill_args(char **argv, t_args *args)
 int	parse_args(int argc, char **argv, t_args *args)
 {
 	if (argc != 9)
-		return (ft_print_error("usage: ./codexion number_of_coders time_to_burnout time_to_compile time_to_debug time_to_refactor number_of_compiles_required dongle_cooldown scheduler"),
-			-1);
+		return (ft_print_error("Number of args should be 8"), -1);
 	if (ft_validate_numbers(argv) == -1)
 		return (-1);
 	if (ft_fill_args(argv, args) == -1)

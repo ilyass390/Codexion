@@ -1,6 +1,18 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   main.c                                             :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: iamessag <iamessag@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/04/20 11:43:51 by iamessag          #+#    #+#             */
+/*   Updated: 2026/04/20 23:10:44 by iamessag         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "codexion.h"
 
-static int	start_threads(t_table *table, int *created)
+int	start_threads(t_table *table, int *created)
 {
 	int	i;
 
@@ -9,11 +21,12 @@ static int	start_threads(t_table *table, int *created)
 		ft_print_error("monitor thread creation failed");
 		return (-1);
 	}
+	table->monitor_init = 1;
 	i = 0;
 	while (i < table->args.nb_coders)
 	{
-		if (pthread_create(&table->coders[i].thread, NULL,
-				coder_routine, &table->coders[i]) != 0)
+		if (pthread_create(&table->coders[i].thread, NULL, coder_routine,
+				&table->coders[i]) != 0)
 		{
 			ft_print_error("coder thread creation failed");
 			pthread_mutex_lock(&table->sched_lock);
@@ -28,11 +41,12 @@ static int	start_threads(t_table *table, int *created)
 	return (0);
 }
 
-static void	join_threads(t_table *table, int created)
+void	join_threads(t_table *table, int created)
 {
 	int	i;
 
-	pthread_join(table->monitor, NULL);
+	if (table->monitor_init)
+		pthread_join(table->monitor, NULL);
 	i = 0;
 	while (i < created)
 	{

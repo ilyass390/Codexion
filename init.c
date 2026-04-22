@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   init.c                                             :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: iamessag <iamessag@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/04/20 11:43:38 by iamessag          #+#    #+#             */
+/*   Updated: 2026/04/20 11:53:17 by iamessag         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "codexion.h"
 
 int	heap_init(t_heap *heap)
@@ -38,42 +50,11 @@ int	init_dongles(t_table *table)
 		if (heap_init(&table->dongles[i].heap) == -1)
 		{
 			while (--i >= 0)
-				free(table->dongles[i].heap.coders);
+				heap_destroy(&table->dongles[i].heap);
 			free(table->dongles);
 			table->dongles = NULL;
 			return (-1);
 		}
-		i++;
-	}
-	return (0);
-}
-
-int	init_coders(t_table *table)
-{
-	t_dongle	*left;
-	t_dongle	*right;
-	int			i;
-
-	table->coders = malloc(sizeof(t_coder) * table->args.nb_coders);
-	if (!table->coders)
-		return (-1);
-	i = 0;
-	while (i < table->args.nb_coders)
-	{
-		table->coders[i].id = i + 1;
-		table->coders[i].last_compile_ms = table->start_ms;
-		table->coders[i].request_time = 0;
-		table->coders[i].deadline = table->start_ms
-			+ table->args.time_to_burnout;
-		table->coders[i].compile_count = 0;
-		table->coders[i].in_queue = 0;
-		table->coders[i].table = table;
-		left = &table->dongles[i];
-		if (i == table->args.nb_coders - 1)
-			right = &table->dongles[0];
-		else
-			right = &table->dongles[i + 1];
-		assign_dongles(&table->coders[i], left, right);
 		i++;
 	}
 	return (0);
@@ -88,6 +69,7 @@ int	init_table(t_table *table)
 	table->sched_lock_init = 0;
 	table->sched_cond_init = 0;
 	table->print_mutex_init = 0;
+	table->monitor_init = 0;
 	if (pthread_mutex_init(&table->sched_lock, NULL) != 0)
 		return (-1);
 	table->sched_lock_init = 1;

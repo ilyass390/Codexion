@@ -1,51 +1,46 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   monitor_routin.c                                   :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: iamessag <iamessag@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/04/20 11:43:58 by iamessag          #+#    #+#             */
+/*   Updated: 2026/04/20 22:46:32 by iamessag         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "codexion.h"
 
-void	log_burnout(t_table *table, t_coder *coder, long now)
+static int	handle_burnout(t_table *table, long long now)
 {
-	pthread_mutex_lock(&table->print_mutex);
-	printf("%lld %d burned out\n", now - table->start_ms, coder->id);
-	pthread_mutex_unlock(&table->print_mutex);
-}
+	t_coder	*dead;
 
-int	check_burnout(t_table *table, long long now, t_coder **dead)
-{
-	int	i;
-
-	i = 0;
-	while (i < table->args.nb_coders)
+	dead = NULL;
+	if (check_burnout(table, now, &dead))
 	{
-		if (now - table->coders[i].last_compile_ms
-			>= table->args.time_to_burnout)
-		{
-			*dead = &table->coders[i];
-			table->stop = 1;
-			pthread_cond_broadcast(&table->sched_cond);
-			return (1);
-		}
-		i++;
+		pthread_mutex_unlock(&table->sched_lock);
+		log_burnout(table, dead, now);
+		return (1);
 	}
 	return (0);
 }
 
-int	check_success(t_table *table)
+static int	handle_success(t_table *table)
 {
-	int	i;
-
-	i = 0;
-	while (i < table->args.nb_coders)
+	if (check_success(table))
 	{
-		if (table->coders[i].compile_count
-			< table->args.number_of_compiles_required)
-			return (0);
-		i++;
+		table->stop = 1;
+		pthread_cond_broadcast(&table->sched_cond);
+		pthread_mutex_unlock(&table->sched_lock);
+		return (1);
 	}
-	return (1);
+	return (0);
 }
 
 void	*monitor_routine(void *arg)
 {
-	t_table	*table;
-	t_coder	*dead;
+	t_table		*table;
 	long long	now;
 
 	table = (t_table *)arg;
@@ -58,22 +53,12 @@ void	*monitor_routine(void *arg)
 			return (NULL);
 		}
 		now = get_time_ms();
-		dead = NULL;
-		if (check_burnout(table, now, &dead))
-		{
-			pthread_mutex_unlock(&table->sched_lock);
-			log_burnout(table, dead, now);
+		if (handle_burnout(table, now))
 			return (NULL);
-		}
-		if (check_success(table))
-		{
-			table->stop = 1;
-			pthread_cond_broadcast(&table->sched_cond);
-			pthread_mutex_unlock(&table->sched_lock);
+		if (handle_success(table))
 			return (NULL);
-		}
 		pthread_mutex_unlock(&table->sched_lock);
-		usleep(1000);
+		usleep(300);
 	}
 	return (NULL);
 }
