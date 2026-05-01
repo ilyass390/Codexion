@@ -22,7 +22,7 @@ int	get_stop(t_table *table)
 	return (stop);
 }
 
-void	smart_sleep(long long duration, t_table *table)
+void		smart_sleep(long long duration, t_table *table)
 {
 	long long	start;
 

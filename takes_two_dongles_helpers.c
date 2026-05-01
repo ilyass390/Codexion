@@ -15,7 +15,7 @@
 void	ms_to_timespec(struct timespec *ts, long long ms)
 {
 	ts->tv_sec = ms / 1000;
-	ts->tv_nsec = (ms % 1000) * 1000000L;
+	ts->tv_nsec = (ms % 1000) * 1000000LL;
 }
 
 long long	long_max(long long a, long long b)

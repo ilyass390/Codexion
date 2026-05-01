@@ -14,9 +14,9 @@
 
 void	log_burnout(t_table *table, t_coder *coder, long long now)
 {
-	pthread_mutex_lock(&table->print_mutex);
+	pthread_mutex_lock(&table->sched_lock);
 	printf("%lld %d burned out\n", now - table->start_ms, coder->id);
-	pthread_mutex_unlock(&table->print_mutex);
+	pthread_mutex_unlock(&table->sched_lock);
 }
 
 int	check_burnout(t_table *table, long long now, t_coder **dead)

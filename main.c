@@ -25,8 +25,8 @@ int	start_threads(t_table *table, int *created)
 	i = 0;
 	while (i < table->args.nb_coders)
 	{
-		if (pthread_create(&table->coders[i].thread, NULL, coder_routine,
-				&table->coders[i]) != 0)
+		if (pthread_create(&table->coders[i].thread, NULL,
+				coder_routine, &table->coders[i]) != 0)
 		{
 			ft_print_error("coder thread creation failed");
 			pthread_mutex_lock(&table->sched_lock);
@@ -38,6 +38,18 @@ int	start_threads(t_table *table, int *created)
 		(*created)++;
 		i++;
 	}
+	pthread_mutex_lock(&table->sched_lock);
+	table->start_ms = get_time_ms();
+	i = 0;
+	while (i < table->args.nb_coders)
+	{
+		table->coders[i].last_compile_ms = table->start_ms;
+		table->coders[i].deadline = table->start_ms
+			+ table->args.time_to_burnout;
+		i++;
+	}
+	pthread_cond_broadcast(&table->sched_cond);
+	pthread_mutex_unlock(&table->sched_lock);
 	return (0);
 }
 

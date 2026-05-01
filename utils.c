@@ -31,7 +31,7 @@ int	ft_is_valid_number(char *str)
 	i = 0;
 	while (str[i] == ' ' || (str[i] >= 9 && str[i] <= 13))
 		i++;
-	if (str[i] == '+')
+	if (str[i] == '+' || str[i] == '-')
 		i++;
 	if (!str[i])
 		return (0);
@@ -47,28 +47,36 @@ int	ft_is_valid_number(char *str)
 int	ft_atoi(char *str)
 {
 	long	result;
+	int		sign;
 	int		i;
 
 	i = 0;
 	while (str[i] == ' ' || (str[i] >= 9 && str[i] <= 13))
 		i++;
+	sign = 1;
 	if (str[i] == '-')
 	{
-		ft_print_error("invalid input");
-		return (-1);
+		sign = -1;
+		i++;
 	}
-	if (str[i] == '+')
+	else if (str[i] == '+')
 		i++;
 	result = 0;
 	while (str[i])
 	{
 		result = result * 10 + (str[i] - '0');
-		if (result > INT_MAX)
+		if (result * sign < 0 || result > INT_MAX)
 		{
 			ft_print_error("invalid input");
 			return (-1);
 		}
 		i++;
+	}
+	result *= sign;
+	if (result < 0)
+	{
+		ft_print_error("invalid input");
+		return (-1);
 	}
 	return ((int)result);
 }

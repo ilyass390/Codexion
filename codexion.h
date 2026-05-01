@@ -24,7 +24,7 @@
 # define FIFO 0
 # define EDF 1
 
-# define HEAP_MAX 2
+# define HEAP_MAX 2	
 
 typedef struct s_args
 {
@@ -68,21 +68,20 @@ struct					s_coder
 	pthread_t			thread;
 };
 
-struct					s_table
+struct s_table
 {
-	t_args				args;
-	t_coder				*coders;
-	t_dongle			*dongles;
-	long long			start_ms;
-	int					stop;
-	pthread_mutex_t		sched_lock;
-	pthread_cond_t		sched_cond;
-	pthread_mutex_t		print_mutex;
-	int					sched_lock_init;
-	int					sched_cond_init;
-	int					print_mutex_init;
-	int					monitor_init;
-	pthread_t			monitor;
+	t_args			args;
+	t_coder			*coders;
+	t_dongle		*dongles;
+	long long		start_ms;
+	int				stop;
+	pthread_mutex_t	sched_lock;
+	pthread_cond_t	sched_cond;
+	int				sched_lock_init;
+	int				sched_cond_init;
+	int				monitor_init;
+	pthread_t		monitor;
+	int    coders_ready;
 };
 
 long long				get_time_ms(void);
@@ -96,8 +95,6 @@ void					ft_print_error(char *msg);
 int						parse_args(int argc, char **argv, t_args *args);
 
 int						heap_init(t_heap *heap);
-void					assign_dongles(t_coder *coder, t_dongle *a,
-							t_dongle *b);
 int						init_dongles(t_table *table);
 int						init_coders(t_table *table);
 int						init_table(t_table *table);

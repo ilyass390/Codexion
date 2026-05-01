@@ -1,15 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   cleenup.c                                          :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: iamessag <iamessag@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/04/20 11:42:58 by iamessag          #+#    #+#             */
-/*   Updated: 2026/04/20 11:43:04 by iamessag         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #include "codexion.h"
 
 void	cleanup_dongles(t_table *table)
@@ -40,6 +28,4 @@ void	cleanup(t_table *table)
 		pthread_mutex_destroy(&table->sched_lock);
 	if (table->sched_cond_init)
 		pthread_cond_destroy(&table->sched_cond);
-	if (table->print_mutex_init)
-		pthread_mutex_destroy(&table->print_mutex);
 }

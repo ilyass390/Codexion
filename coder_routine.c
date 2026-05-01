@@ -41,13 +41,24 @@ void	*coder_routine(void *arg)
 	t_coder	*coder;
 
 	coder = (t_coder *)arg;
+	pthread_mutex_lock(&coder->table->sched_lock);
+    coder->table->coders_ready++;
+    while (coder->table->coders_ready < coder->table->args.nb_coders
+        && !coder->table->stop)
+        pthread_cond_wait(&coder->table->sched_cond,
+            &coder->table->sched_lock);
+    pthread_mutex_unlock(&coder->table->sched_lock);
+    if (get_stop(coder->table))
+	{
+        return (NULL);
+	}
 	if (coder->id % 2 == 0)
-		usleep((coder->table->args.time_to_compile
-				+ coder->table->args.dongle_cooldown) * 1000);
+		smart_sleep(coder->table->args.time_to_compile
+			+ coder->table->args.dongle_cooldown, coder->table);
 	else if (coder->id == coder->table->args.nb_coders
 		&& coder->table->args.nb_coders % 2 == 1)
-		usleep(2 * (coder->table->args.time_to_compile
-				+ coder->table->args.dongle_cooldown) * 1000);
+		smart_sleep(2 * (coder->table->args.time_to_compile
+				+ coder->table->args.dongle_cooldown), coder->table);
 	while (!get_stop(coder->table))
 	{
 		if (!do_compile(coder))
