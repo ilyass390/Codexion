@@ -12,18 +12,19 @@
 
 #include "codexion.h"
 
-static void	assign_dongles(t_coder *coder, t_dongle *a, t_dongle *b)
+static void	init_coder_times(t_coder *coder, t_table *table)
 {
-	if (a->id < b->id)
-	{
-		coder->lowest = a;
-		coder->highest = b;
-	}
-	else
-	{
-		coder->lowest = b;
-		coder->highest = a;
-	}
+	coder->last_compile_ms = table->start_ms;
+	coder->request_time = 0;
+	coder->deadline = table->start_ms + table->args.time_to_burnout;
+}
+
+static void	init_coder_state(t_coder *coder, t_table *table, int i)
+{
+	coder->id = i + 1;
+	coder->compile_count = 0;
+	coder->in_queue = 0;
+	coder->table = table;
 }
 
 static void	init_coder_dongles(t_coder *coder, t_table *table, int i)
@@ -39,13 +40,6 @@ static void	init_coder_dongles(t_coder *coder, t_table *table, int i)
 	assign_dongles(coder, left, right);
 }
 
-static void	init_coder(t_coder *coder, t_table *table, int i)
-{
-	coder->id = i + 1;
-	coder->table = table;
-	init_coder_dongles(coder, table, i);
-}
-
 int	init_coders(t_table *table)
 {
 	int	i;
@@ -56,7 +50,9 @@ int	init_coders(t_table *table)
 	i = 0;
 	while (i < table->args.nb_coders)
 	{
-		init_coder(&table->coders[i], table, i);
+		init_coder_state(&table->coders[i], table, i);
+		init_coder_times(&table->coders[i], table);
+		init_coder_dongles(&table->coders[i], table, i);
 		i++;
 	}
 	return (0);

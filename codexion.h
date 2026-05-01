@@ -95,6 +95,8 @@ void					ft_print_error(char *msg);
 int						parse_args(int argc, char **argv, t_args *args);
 
 int						heap_init(t_heap *heap);
+void					assign_dongles(t_coder *coder, t_dongle *a,
+							t_dongle *b);
 int						init_dongles(t_table *table);
 int						init_coders(t_table *table);
 int						init_table(t_table *table);

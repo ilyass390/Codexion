@@ -21,6 +21,20 @@ int	heap_init(t_heap *heap)
 	return (0);
 }
 
+void	assign_dongles(t_coder *coder, t_dongle *a, t_dongle *b)
+{
+	if (a->id < b->id)
+	{
+		coder->lowest = a;
+		coder->highest = b;
+	}
+	else
+	{
+		coder->lowest = b;
+		coder->highest = a;
+	}
+}
+
 int	init_dongles(t_table *table)
 {
 	int	i;
@@ -48,7 +62,14 @@ int	init_dongles(t_table *table)
 
 int	init_table(t_table *table)
 {
-	memset(table, 0, sizeof(t_table));
+	table->start_ms = get_time_ms();
+	table->stop = 0;
+	table->dongles = NULL;
+	table->coders = NULL;
+	table->sched_lock_init = 0;
+	table->sched_cond_init = 0;
+	table->monitor_init = 0;
+	table->coders_ready = 0;
 	if (pthread_mutex_init(&table->sched_lock, NULL) != 0)
 		return (-1);
 	table->sched_lock_init = 1;
