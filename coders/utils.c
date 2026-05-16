@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: iamessag <iamessag@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/04/20 11:44:24 by iamessag          #+#    #+#             */
-/*   Updated: 2026/04/20 11:54:01 by iamessag         ###   ########.fr       */
+/*   Created: 2026/05/10 21:05:14 by iamessag          #+#    #+#             */
+/*   Updated: 2026/05/15 18:23:41 by iamessag         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,36 +47,23 @@ int	ft_is_valid_number(char *str)
 int	ft_atoi(char *str)
 {
 	long	result;
-	int		sign;
 	int		i;
 
 	i = 0;
 	while (str[i] == ' ' || (str[i] >= 9 && str[i] <= 13))
 		i++;
-	sign = 1;
-	if (str[i] == '-')
-	{
-		sign = -1;
-		i++;
-	}
-	else if (str[i] == '+')
+	if (str[i] == '+')
 		i++;
 	result = 0;
 	while (str[i])
 	{
 		result = result * 10 + (str[i] - '0');
-		if (result * sign < 0 || result > INT_MAX)
+		if (result > INT_MAX)
 		{
-			ft_print_error("invalid input");
+			ft_print_error("number too large");
 			return (-1);
 		}
 		i++;
-	}
-	result *= sign;
-	if (result < 0)
-	{
-		ft_print_error("invalid input");
-		return (-1);
 	}
 	return ((int)result);
 }

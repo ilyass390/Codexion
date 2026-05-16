@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: iamessag <iamessag@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/04/20 11:44:10 by iamessag          #+#    #+#             */
-/*   Updated: 2026/04/20 12:08:14 by iamessag         ###   ########.fr       */
+/*   Created: 2026/05/10 21:04:51 by iamessag          #+#    #+#             */
+/*   Updated: 2026/05/15 18:22:59 by iamessag         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,25 +21,16 @@ int	ft_parse_scheduler(char *str)
 	return (-1);
 }
 
-static int	ft_validate_ranges(t_args *args)
-{
-	if (args->nb_coders < 1)
-		return (ft_print_error("number_of_coders must be >= 1"), -1);
-	return (0);
-}
-
 static int	ft_validate_numbers(char **argv)
 {
-	int		i;
-	char	*c;
+	int	i;
 
-	c = "all arguments except scheduler must be valid positive integers";
 	i = 1;
 	while (i <= 7)
 	{
 		if (!ft_is_valid_number(argv[i]))
 		{
-			ft_print_error(c);
+			ft_print_error("all arguments must be valid positive integers");
 			return (-1);
 		}
 		i++;
@@ -70,6 +61,8 @@ static int	ft_fill_args(char **argv, t_args *args)
 	args->dongle_cooldown = ft_atoi(argv[7]);
 	if (args->dongle_cooldown == -1)
 		return (-1);
+	if (args->nb_coders < 1)
+		return (ft_print_error("number_of_coders must be >= 1"), -1);
 	return (0);
 }
 
@@ -80,8 +73,6 @@ int	parse_args(int argc, char **argv, t_args *args)
 	if (ft_validate_numbers(argv) == -1)
 		return (-1);
 	if (ft_fill_args(argv, args) == -1)
-		return (-1);
-	if (ft_validate_ranges(args) == -1)
 		return (-1);
 	args->scheduler = ft_parse_scheduler(argv[8]);
 	if (args->scheduler == -1)

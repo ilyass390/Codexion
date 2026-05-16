@@ -1,13 +1,15 @@
 NAME	= codexion
 
 CC		= cc
+
 CFLAGS	= -Wall -Wextra -Werror -pthread
 
-SRCS	= cleenup.c coder_routine.c heap_helpers.c  \
-		  init.c log_state.c main.c monitor_routin.c \
-		  parsing.c take_two_dongles.c utils.c init_coders.c \
-		  coder_helper.c heap_func.c monitor_helper.c takes_two_dongles_helpers.c
+SRCS	= ./coders/cleanup.c ./coders/init.c ./coders/monitor_routine.c  ./coders/take_two_dongles.c \
+		  ./coders/coder_routine.c  ./coders/lock_unlock.c  ./coders/parsing.c ./coders/utils.c \
+		  ./coders/heap_func.c ./coders/logs.c ./coders/push_to_queue.c \
+		  ./coders/heap_helpers.c ./coders/main.c ./coders/state.c ./coders/init_coder.c
 
+HEADER = ./coders/codexion.h
 OBJS	= $(SRCS:.c=.o)
 
 all: $(NAME)
@@ -15,7 +17,7 @@ all: $(NAME)
 $(NAME): $(OBJS)
 	$(CC) $(CFLAGS) $(OBJS) -o $(NAME)
 
-%.o: %.c
+%.o: %.c $(HEADER)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
@@ -26,4 +28,4 @@ fclean: clean
 
 re: fclean all
 
-.PHONY: clean
+.PHONY: all clean fclean re

@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: iamessag <iamessag@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/04/20 11:43:38 by iamessag          #+#    #+#             */
-/*   Updated: 2026/04/20 11:53:17 by iamessag         ###   ########.fr       */
+/*   Created: 2026/05/13 19:22:54 by iamessag          #+#    #+#             */
+/*   Updated: 2026/05/14 21:32:25 by iamessag         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,18 +21,20 @@ int	heap_init(t_heap *heap)
 	return (0);
 }
 
-void	assign_dongles(t_coder *coder, t_dongle *a, t_dongle *b)
+static void	cleanup_dongles_partial(t_table *table, int count)
 {
-	if (a->id < b->id)
+	int	i;
+
+	i = 0;
+	while (i < count)
 	{
-		coder->lowest = a;
-		coder->highest = b;
+		heap_destroy(&table->dongles[i].heap);
+		if (table->dongles[i].mutex_init)
+			pthread_mutex_destroy(&table->dongles[i].mutex);
+		i++;
 	}
-	else
-	{
-		coder->lowest = b;
-		coder->highest = a;
-	}
+	free(table->dongles);
+	table->dongles = NULL;
 }
 
 int	init_dongles(t_table *table)
@@ -46,15 +48,13 @@ int	init_dongles(t_table *table)
 	while (i < table->args.nb_coders)
 	{
 		table->dongles[i].id = i;
-		table->dongles[i].available_at = table->start_ms;
+		table->dongles[i].available_at = 0;
+		table->dongles[i].mutex_init = 0;
 		if (heap_init(&table->dongles[i].heap) == -1)
-		{
-			while (--i >= 0)
-				heap_destroy(&table->dongles[i].heap);
-			free(table->dongles);
-			table->dongles = NULL;
-			return (-1);
-		}
+			return (cleanup_dongles_partial(table, i), -1);
+		if (pthread_mutex_init(&table->dongles[i].mutex, NULL) != 0)
+			return (cleanup_dongles_partial(table, i + 1), -1);
+		table->dongles[i].mutex_init = 1;
 		i++;
 	}
 	return (0);
@@ -62,20 +62,25 @@ int	init_dongles(t_table *table)
 
 int	init_table(t_table *table)
 {
-	table->start_ms = get_time_ms();
+	table->start_ms = 0;
 	table->stop = 0;
+	table->coders_ready = 0;
+	table->simulation_started = 0;
 	table->dongles = NULL;
 	table->coders = NULL;
-	table->sched_lock_init = 0;
-	table->sched_cond_init = 0;
+	table->print_mutex_init = 0;
+	table->state_mutex_init = 0;
+	table->start_cond_init = 0;
 	table->monitor_init = 0;
-	table->coders_ready = 0;
-	if (pthread_mutex_init(&table->sched_lock, NULL) != 0)
+	if (pthread_mutex_init(&table->print_mutex, NULL) != 0)
 		return (-1);
-	table->sched_lock_init = 1;
-	if (pthread_cond_init(&table->sched_cond, NULL) != 0)
+	table->print_mutex_init = 1;
+	if (pthread_mutex_init(&table->state_mutex, NULL) != 0)
 		return (-1);
-	table->sched_cond_init = 1;
+	table->state_mutex_init = 1;
+	if (pthread_cond_init(&table->start_cond, NULL) != 0)
+		return (-1);
+	table->start_cond_init = 1;
 	if (init_dongles(table) == -1)
 		return (-1);
 	if (init_coders(table) == -1)

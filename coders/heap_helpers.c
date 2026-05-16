@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: iamessag <iamessag@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/04/20 12:02:29 by iamessag          #+#    #+#             */
-/*   Updated: 2026/04/20 12:03:08 by iamessag         ###   ########.fr       */
+/*   Created: 2026/05/10 21:03:54 by iamessag          #+#    #+#             */
+/*   Updated: 2026/05/15 10:37:17 by iamessag         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,8 +15,16 @@
 int	heap_compare(t_coder *a, t_coder *b, int scheduler)
 {
 	if (scheduler == FIFO)
+	{
+		if (a->request_time != b->request_time)
+			return (a->request_time < b->request_time);
+		return (a->id < b->id);
+	}
+	if (a->deadline != b->deadline)
+		return (a->deadline < b->deadline);
+	if (a->request_time != b->request_time)
 		return (a->request_time < b->request_time);
-	return (a->deadline < b->deadline);
+	return (a->id < b->id);
 }
 
 void	heap_swap(t_heap *heap, int a, int b)

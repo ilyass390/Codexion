@@ -1,33 +1,32 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   init_coders.c                                      :+:      :+:    :+:   */
+/*   init_coder.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: iamessag <iamessag@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/04/20 11:52:30 by iamessag          #+#    #+#             */
-/*   Updated: 2026/04/20 11:53:06 by iamessag         ###   ########.fr       */
+/*   Created: 2026/05/13 19:23:04 by iamessag          #+#    #+#             */
+/*   Updated: 2026/05/13 19:23:06 by iamessag         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "codexion.h"
 
-static void	init_coder_times(t_coder *coder, t_table *table)
+void	assign_dongles(t_coder *coder, t_dongle *a, t_dongle *b)
 {
-	coder->last_compile_ms = table->start_ms;
-	coder->request_time = 0;
-	coder->deadline = table->start_ms + table->args.time_to_burnout;
+	if (a->id < b->id)
+	{
+		coder->lowest = a;
+		coder->highest = b;
+	}
+	else
+	{
+		coder->lowest = b;
+		coder->highest = a;
+	}
 }
 
-static void	init_coder_state(t_coder *coder, t_table *table, int i)
-{
-	coder->id = i + 1;
-	coder->compile_count = 0;
-	coder->in_queue = 0;
-	coder->table = table;
-}
-
-static void	init_coder_dongles(t_coder *coder, t_table *table, int i)
+void	init_coder_dongles(t_table *table, int i)
 {
 	t_dongle	*left;
 	t_dongle	*right;
@@ -37,7 +36,19 @@ static void	init_coder_dongles(t_coder *coder, t_table *table, int i)
 		right = &table->dongles[0];
 	else
 		right = &table->dongles[i + 1];
-	assign_dongles(coder, left, right);
+	assign_dongles(&table->coders[i], left, right);
+}
+
+void	init_coder(t_table *table, int i)
+{
+	table->coders[i].id = i + 1;
+	table->coders[i].compile_count = 0;
+	table->coders[i].last_compile_ms = 0;
+	table->coders[i].request_time = 0;
+	table->coders[i].deadline = 0;
+	table->coders[i].in_queue = 0;
+	table->coders[i].table = table;
+	init_coder_dongles(table, i);
 }
 
 int	init_coders(t_table *table)
@@ -50,9 +61,7 @@ int	init_coders(t_table *table)
 	i = 0;
 	while (i < table->args.nb_coders)
 	{
-		init_coder_state(&table->coders[i], table, i);
-		init_coder_times(&table->coders[i], table);
-		init_coder_dongles(&table->coders[i], table, i);
+		init_coder(table, i);
 		i++;
 	}
 	return (0);
